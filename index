@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quiz Application</title>
+</head>
+<body>
+<h1>Quiz</h1>
+<form action="/submit" method="post">
+    <div th:each="question : ${questions}">
+        <p th:text="${question.questionText}"></p>
+        <div th:each="option, iterStat : ${question.options}">
+            <input type="radio" th:name="${'question' + question.id}" th:value="${option}"/> <span th:text="${option}"></span><br/>
+        </div>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>
+result.html:
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quiz Result</title>
+</head>
+<body>
+<h1>Your Score</h1>
+<p th:text="'Your score: ' + ${score}"></p>
+<a href="/">Take another quiz</a>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <script>
+        async function fetchLeaderboard(type, quizId = null) {
+            const url = quizId ? `/api/leaderboard/quiz/${quizId}` : '/api/leaderboard/overall';
+            const response = await fetch(url);
+            const data = await response.json();
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = ''; // Clear existing data
+
+            data.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${user.username}</td>
+                    <td>${user.totalScore || user.averageScore}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.onload = () => {
+            fetchLeaderboard(); // Fetch overall leaderboard on page load
+        };
+    </script>
+</head>
+<body>
+    <h1>Leaderboard</h1>
+    <table id="leaderboard">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>
+</html>
